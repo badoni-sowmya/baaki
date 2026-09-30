@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  baaki theme tokens. The app is light-only for now (dark mode is planned —
+  the previous dark palette is in git history, commit 083ee55).
+*/
+/*
+  College.xyz — editorial parchment + near-black ink + warm clay-coral accent.
+  Flat, sharp-cornered, mono-typed. Depth comes from borders and hard offset
+  shadows, never blur or gloss.
+*/
+:root {
+  /* Exact spec values (hex → HSL, no rounding drift). */
+  --bg: 42 31.3% 93.7%;       /* surface / tertiary #f4f1ea */
+  --surface: 42 31.3% 93.7%;  /* surface == page: one printed plane */
+  --surface-2: 40 24% 89.5%;  /* slightly pressed parchment */
+  --border: 0 0% 10.2%;       /* ink hairlines — cards are outlined, not shaded */
+  --border-strong: 0 0% 10.2%;
+  --border-faint: 220 13% 91%; /* neutral #e5e7eb, low-emphasis rules only */
+  --fg: 0 0% 10.2%;           /* on-surface #1a1a1a */
+  --muted: 0 0% 32%;          /* ink at reduced emphasis (AA on parchment) */
+  --faint: 0 0% 45%;
+  --brand: 16 60.6% 61.2%;    /* primary #d88060 */
+  --brand-fg: 0 0% 10.2%;     /* dark ink ON coral, per button-primary */
+  --brand-soft: 18 61% 88%;   /* coral wash for badges/active nav */
+  --brand-hover: 15.7 53% 54.9%; /* primary-80 #c96f4f */
+  --brand-light: 16.7 61% 68.8%; /* primary-60 #e09a7f */
+  --secondary: 0 0% 10.2%;    /* #1a1a1a */
+  --tertiary: 42 31.3% 93.7%; /* #f4f1ea */
+  --accent: 15.7 53% 44%;     /* coral darkened for legible link text */
+  --income: 150 42% 30%;      /* muted warm-leaning green (see note below) */
+  --expense: 8.1 52.1% 47.5%; /* error #b84b3a */
+  --warning: 30 62% 40%;
+  --ring: 15.7 53% 45%;
+  --shadow: 0 0% 10.2%;       /* hard ink shadow */
+  --overlay: 0 0% 10.2%;
+  /* Spending-calendar heat: how much was spent on a day, as a coral wash. */
+  --heat: 16 60.6% 61.2%;
+  color-scheme: light;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+html {
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background-color: hsl(var(--bg));
+  color: hsl(var(--fg));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+/* Headlines are heavy and negatively tracked — poster-like rhythm. */
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Money and any numeric data use tabular, lining figures so columns align. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* Focus ring — visible for keyboard users. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer utilities {
+  /* Safe area padding for mobile notch and home indicator bar */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Fast tap response on touch devices without 300ms delay */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+@layer components {
+  .card {
+    @apply rounded-md border border-border bg-surface;
+  }
+  /* Stamped, label-like meta text — the institutional voice of the system. */
+  .label {
+    @apply text-label-md uppercase text-muted;
+  }
+  .input-base {
+    @apply w-full rounded-none border border-border bg-surface px-4 py-3 text-[15px] text-fg
+           placeholder:text-faint transition-colors
+           focus:border-brand focus:outline-none focus:ring-2 focus:ring-ring/25
+           disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  /* Hard offset shadow — retro stamped press. No blur, ever. */
+  .stamp {
+    box-shadow: 3px 3px 0 0 hsl(var(--shadow));
+  }
+  .stamp-sm {
+    box-shadow: 2px 2px 0 0 hsl(var(--shadow));
+  }
+  /* Pressed state: shadow collapses and the element shifts into it. */
+  .stamp-press {
+    @apply translate-x-[2px] translate-y-[2px];
+    box-shadow: 0 0 0 0 hsl(var(--shadow));
+  }
+}
+
+/* Custom scrollbar, subtle. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--faint));
+  border-radius: 0;
+  border: 3px solid hsl(var(--bg));
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--faint));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Hide number input spinners for a cleaner money field. */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Date inputs on iOS Safari use a content-based intrinsic width and ignore
+   `width: 100%` / box-sizing, so the field overflowed the modal (and let the
+   whole sheet pan sideways). Strip the native appearance and let it shrink. */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 3rem;
+}
+/* iOS centers the value via this pseudo-element; left-align it so the date
+   reads like every other field, and stop it from forcing extra width. */
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-width: 0;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  margin-inline-start: auto;
+}
+
+/* Recharts makes chart parts focusable — the Pie's root <g> gets tabindex="0"
+   and every slice <g> *and* its <path> get tabindex="-1" — so clicking a
+   slice moves focus onto it and the browser draws its blue focus ring around
+   it. Charts here have no keyboard interaction to signal, so no element
+   inside a chart gets a focus ring, a tap flash, or text selection. */
+.recharts-wrapper,
+.recharts-wrapper * {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.recharts-wrapper *:focus,
+.recharts-wrapper *:focus-visible {
+  outline: none;
+}
